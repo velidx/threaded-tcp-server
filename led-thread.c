@@ -22,24 +22,25 @@
 // Warteschlange fuer ankommende Verbindung
 #define QUEUE 3
 
-int rest3;
+//int rest3;
 
 // *** LED-Funktion (Prototyp für pthread_create) ***
 // arg: Pointer auf rec_socket
 void *led(void* arg)
 {
-	wiringPiSetup();
-	pinMode( pin1 , OUTPUT);
-	pinMode( pin2 , OUTPUT);
-	pinMode( pin3 , OUTPUT);
-	pinMode( pin4 , OUTPUT);
+
 	int clientfd = *(int *)arg; // typecast
 	char inbuffer[BUFSIZE];
 	char outbuffer[BUFSIZE];
 	
+	write(clientfd,"Willkommen!\n",13);
+	write(clientfd,"Menue:\n",8);
+	write(clientfd,"mit Eingabe der Zahlen zw. 0 und 15 koennen Sie die LEDs steuern\n",67);
+	write(clientfd,"mit eingeben von ' q ' beenden Sie das Programm\n",50);
+	
 while (1){
 	
-	int rest,rest1,rest2;
+	int rest,rest1,rest2,rest3;
 	int state,state1,state2,state3;
 	
 	// lesen der Zeichen aus dem Clientsocket --> inbuffer
@@ -84,7 +85,12 @@ while (1){
 
 // *** Main ***
 int main()
-{
+{	
+	wiringPiSetup();
+	pinMode( pin1 , OUTPUT);
+	pinMode( pin2 , OUTPUT);
+	pinMode( pin3 , OUTPUT);
+	pinMode( pin4 , OUTPUT);
 	
 	int server_socket, rec_socket;
 	unsigned int len;
@@ -111,11 +117,6 @@ int main()
 		// Verbindung vom Client eingetroffen
 		rec_socket = accept(server_socket,(struct sockaddr *)&clientinfo, &len);
 		printf("Verbindung vom %s:%d\n", inet_ntoa(clientinfo.sin_addr), ntohs(clientinfo.sin_port));
-		
-		printf("Willkommen!\n");
-		printf("Menue:\n");
-		printf("mit Eingabe der Zahlen zw. 0 und 15 koennen Sie die LEDs steuern\n");
-		printf("mit eingeben von ' q ' beenden Sie das Programm\n");
 		
 		pthread_t child; // Thread Struktur
 		// Thread mit Funktion mirror(rec_socket) erzeugen
